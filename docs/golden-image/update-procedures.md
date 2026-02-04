@@ -253,14 +253,14 @@ Update your deployment records:
 
 | Field | Value |
 |-------|-------|
-| Site Name | {Client name} |
-| Hostname | {collector-hostname} |
-| Golden Image Version | {e.g., 1.1.0} |
-| Re-Image Date | {YYYY-MM-DD} |
-| Technician | {Name} |
-| Old SD Card Location | {e.g., labeled and stored} |
-| Auvik Status | {Online/Reporting} |
-| Tailscale Status | {Connected} |
+| Site Name | `{Client name}` |
+| Hostname | `{collector-hostname}` |
+| Golden Image Version | `{e.g., 1.1.0}` |
+| Re-Image Date | `{YYYY-MM-DD}` |
+| Technician | `{Name}` |
+| Old SD Card Location | `{e.g., labeled and stored}` |
+| Auvik Status | `{Online/Reporting}` |
+| Tailscale Status | `{Connected}` |
 
 ## Rollback Procedures
 
@@ -581,7 +581,7 @@ ssh viyuadmin@collector-hostname "sudo journalctl -p err -n 20 --no-pager"
 - [ ] SSH access working normally
 - [ ] System load normal (`uptime`, `top`)
 - [ ] No memory issues (`free -h`)
-- [ ] Temperature normal (Raspberry Pi 5: <60°C idle)
+- [ ] Temperature normal (Raspberry Pi 5: &lt;60°C idle)
 
 **24-Hour monitoring:**
 
