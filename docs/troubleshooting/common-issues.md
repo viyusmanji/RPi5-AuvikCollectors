@@ -61,6 +61,50 @@ tailscale netcheck
 sudo tailscale up --ssh
 ```
 
+## SSH Connection Method Selection
+
+Use this decision tree to select the appropriate SSH connection method based on your location and available network access.
+
+```mermaid
+flowchart TD
+    Start([Need to SSH to collector?])
+    OnSite{Are you on-site<br/>at collector location?}
+    VPN{Can you access<br/>client VPN?}
+    Tailscale{Security compliance<br/>allows Tailscale?}
+
+    DirectSSH[✅ Use Direct SSH<br/>via local network<br/>See: LAN Connection]
+    VPNSSH[✅ Use SSH via VPN<br/>Connect to VPN first<br/>See: Client VPN Connection]
+    TailscaleSSH[⚠️ Use Tailscale SSH<br/>Mesh VPN access<br/>See: Tailscale VPN Connection]
+    NoMethod[❌ No recommended method<br/>Contact network admin<br/>or request VPN access]
+
+    Start --> OnSite
+    OnSite -->|Yes| DirectSSH
+    OnSite -->|No| VPN
+    VPN -->|Yes| VPNSSH
+    VPN -->|No| Tailscale
+    Tailscale -->|Yes| TailscaleSSH
+    Tailscale -->|No| NoMethod
+
+    classDef recommended fill:#22c55e,stroke:#16a34a,color:#000
+    classDef acceptable fill:#eab308,stroke:#ca8a04,color:#000
+    classDef avoid fill:#ef4444,stroke:#dc2626,color:#fff
+
+    class DirectSSH,VPNSSH recommended
+    class TailscaleSSH acceptable
+    class NoMethod avoid
+```
+
+**Legend:**
+- ✅ **Green (Recommended)** - Primary recommended approach for this scenario
+- ⚠️ **Yellow (Acceptable)** - Acceptable alternative, may have security considerations
+- ❌ **Red (Avoid)** - Not recommended, requires alternative solution
+
+**Quick reference:**
+- **On-site access** → Direct SSH is fastest and most reliable
+- **Remote with VPN** → VPN tunnel provides secure corporate access
+- **Remote without VPN** → Tailscale offers mesh VPN (verify security policy first)
+- **No VPN or Tailscale** → Contact network administrator for access options
+
 ## Escalation Path
 
 If standard troubleshooting doesn't resolve the issue:
