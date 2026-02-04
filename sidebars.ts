@@ -91,6 +91,7 @@ const sidebars: SidebarsConfig = {
         'troubleshooting/pi-not-powering',
         'troubleshooting/collector-offline',
         'troubleshooting/sd-card-failure',
+        'troubleshooting/performance-issues',
       ],
     },
     {

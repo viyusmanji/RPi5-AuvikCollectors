@@ -9,7 +9,7 @@ Diagnosing and resolving performance problems with Raspberry Pi 5 Auvik collecto
 ## Symptoms
 
 - **Polling latency** — Gaps in monitoring graphs, delayed updates
-- **High CPU/memory usage** — Sustained >80% utilization
+- **High CPU/memory usage** — Sustained &gt;80% utilization
 - **Slow device discovery** — New devices take longer to appear
 - **Auvik portal warnings** — Performance degradation alerts
 - **System responsiveness** — SSH lag, slow command execution
@@ -18,8 +18,8 @@ Diagnosing and resolving performance problems with Raspberry Pi 5 Auvik collecto
 
 | Symptom | Likely Cause | Quick Fix |
 |---------|--------------|-----------|
-| High memory (>85%) | Too many devices/interfaces | Review scale thresholds, consider VM migration |
-| High CPU (>80%) | Polling overload or runaway process | Check device count, review top processes |
+| High memory (&gt;85%) | Too many devices/interfaces | Review scale thresholds, consider VM migration |
+| High CPU (&gt;80%) | Polling overload or runaway process | Check device count, review top processes |
 | Slow discovery | Resource exhaustion | Reduce discovery scope, scale to VM |
 | Disk I/O bottleneck | Poor SD card, excessive logging | Replace with A2-rated card, rotate logs |
 | Network latency spikes | Bandwidth saturation | Review polling frequency, check network utilization |
@@ -34,11 +34,11 @@ Under typical load (100 devices, 4,000 interfaces):
 
 | Metric | Normal Range | Warning Threshold | Critical |
 |--------|--------------|-------------------|----------|
-| CPU Usage | 20-40% | >60% sustained | >80% |
-| Memory Used | 2-4 GB | >6.5 GB (>85%) | >7.5 GB |
-| Load Average (1m) | 0.5-1.5 | >2.5 | >3.5 |
-| Disk Free | >20 GB | <5 GB | <2 GB |
-| SNMP Poll Time | <10s | >20s | >30s |
+| CPU Usage | 20-40% | &gt;60% sustained | &gt;80% |
+| Memory Used | 2-4 GB | &gt;6.5 GB (&gt;85%) | &gt;7.5 GB |
+| Load Average (1m) | 0.5-1.5 | &gt;2.5 | &gt;3.5 |
+| Disk Free | &gt;20 GB | &lt;5 GB | &lt;2 GB |
+| SNMP Poll Time | &lt;10s | &gt;20s | &gt;30s |
 
 ### Pi 5 4GB Baseline Metrics
 
@@ -46,11 +46,11 @@ Under typical load (50 devices, 2,000 interfaces):
 
 | Metric | Normal Range | Warning Threshold | Critical |
 |--------|--------------|-------------------|----------|
-| CPU Usage | 20-40% | >60% sustained | >80% |
-| Memory Used | 1.5-2.5 GB | >3.2 GB (>85%) | >3.7 GB |
-| Load Average (1m) | 0.5-1.5 | >2.5 | >3.5 |
-| Disk Free | >20 GB | <5 GB | <2 GB |
-| SNMP Poll Time | <10s | >20s | >30s |
+| CPU Usage | 20-40% | &gt;60% sustained | &gt;80% |
+| Memory Used | 1.5-2.5 GB | &gt;3.2 GB (&gt;85%) | &gt;3.7 GB |
+| Load Average (1m) | 0.5-1.5 | &gt;2.5 | &gt;3.5 |
+| Disk Free | &gt;20 GB | &lt;5 GB | &lt;2 GB |
+| SNMP Poll Time | &lt;10s | &gt;20s | &gt;30s |
 
 :::tip
 Baseline metrics vary by network size and complexity. Establish your own baselines during initial deployment by monitoring for the first week.
@@ -88,15 +88,15 @@ or 7,000 interfaces on Pi 5 8GB?
        │
       NO
        ▼
-CPU >60% sustained
-or Memory >85%?
+CPU &gt;60% sustained
+or Memory &gt;85%?
        │
        ▼
      YES → Plan VM migration
        │
       NO
        ▼
-Polling latency >15s
+Polling latency &gt;15s
 or discovery slow?
        │
        ▼
@@ -135,10 +135,10 @@ mpstat -P ALL 1
 ```
 
 **Interpreting CPU metrics:**
-- **<40%** — Healthy
+- **&lt;40%** — Healthy
 - **40-60%** — Monitor, plan for growth
 - **60-80%** — Scale soon
-- **>80%** — Critical, migrate to VM immediately
+- **&gt;80%** — Critical, migrate to VM immediately
 
 ### Memory Monitoring
 
@@ -157,10 +157,10 @@ watch -n 2 free -h
 ```
 
 **Interpreting memory metrics:**
-- **<60%** — Healthy
+- **&lt;60%** — Healthy
 - **60-80%** — Normal under load
 - **80-90%** — Warning, plan to scale
-- **>90%** — Critical, migrate immediately
+- **&gt;90%** — Critical, migrate immediately
 
 ### Disk I/O Monitoring
 
@@ -180,9 +180,9 @@ du -sh /home/viyu/*
 ```
 
 **Warning signs:**
-- **High iowait** (>10%) — Disk bottleneck
-- **<2GB free** — Risk of disk full
-- **Large log files** (>1GB) — Rotation needed
+- **High iowait** (&gt;10%) — Disk bottleneck
+- **&lt;2GB free** — Risk of disk full
+- **Large log files** (&gt;1GB) — Rotation needed
 
 ### Network Monitoring
 
@@ -508,7 +508,7 @@ sudo systemctl restart auvik-collector
 
 ### Scenario 3: Disk Space Exhaustion
 
-**Symptoms:** Disk usage >95%, services failing
+**Symptoms:** Disk usage &gt;95%, services failing
 
 **Diagnosis:**
 ```bash
