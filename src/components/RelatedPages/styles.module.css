@@ -98,6 +98,7 @@
   .relatedPages {
     padding: 1rem;
     margin-top: 1.5rem;
+    overflow: hidden;
   }
 
   .header {
@@ -114,11 +115,19 @@
 
   .categories {
     gap: 1.25rem;
+    grid-template-columns: 1fr;
+  }
+
+  .pageList {
+    gap: 0.625rem;
   }
 
   .pageLink {
-    padding: 0.625rem 0.75rem;
+    padding: 0.75rem 0.875rem;
     font-size: 0.9375rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
   }
 }
 

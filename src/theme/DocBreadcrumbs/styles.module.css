@@ -72,10 +72,19 @@
     font-size: 0.8125rem;
     padding: 0.5rem 0;
     margin-bottom: 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   .breadcrumbsList {
     gap: 0.25rem;
+    flex-wrap: nowrap;
+    min-height: 44px;
+  }
+
+  .breadcrumbsItem {
+    white-space: nowrap;
   }
 
   .breadcrumbsItem:not(:last-child)::after {
@@ -84,7 +93,14 @@
   }
 
   .breadcrumbItem {
-    padding: 0.125rem 0.375rem;
+    padding: 0.625rem 0.75rem;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .breadcrumbHomeIcon {
+    font-size: 1.125rem;
   }
 }
 
