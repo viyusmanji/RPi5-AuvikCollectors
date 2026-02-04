@@ -312,6 +312,139 @@ ssh viyu@<collector-ip> -v  # verbose mode for debugging
 ip route show default
 ```
 
+### 5. SSH Port Forwarding
+
+Access collectors through port forwarding (local, remote, or dynamic).
+
+**Prerequisites:**
+- SSH access to an intermediate host that can reach collector
+- Understanding of which port forwarding type is needed
+- Port forwarding not blocked by firewall
+
+**Port forwarding types:**
+
+**Option A: Local Port Forwarding**
+
+Forward local port to collector through intermediate host.
+
+```bash
+# Forward local port 2222 to collector's SSH port
+ssh -L 2222:<collector-ip>:22 user@intermediate-host
+
+# In another terminal, connect via localhost
+ssh -p 2222 viyu@localhost
+
+# Alternative: Background process
+ssh -fNL 2222:<collector-ip>:22 user@intermediate-host
+ssh -p 2222 viyu@localhost
+```
+
+**Option B: Remote Port Forwarding**
+
+Forward remote port back to your workstation (reverse tunnel).
+
+```bash
+# On your workstation: forward port 2222 on intermediate host to local SSH
+ssh -R 2222:localhost:22 user@intermediate-host
+
+# Then from intermediate host, connect back to your workstation
+ssh -p 2222 user@localhost
+```
+
+**Option C: Dynamic Port Forwarding (SOCKS Proxy)**
+
+Create a SOCKS proxy for flexible routing.
+
+```bash
+# Create SOCKS proxy on local port 1080
+ssh -D 1080 user@intermediate-host
+
+# Configure your SSH client to use the proxy
+ssh -o ProxyCommand='nc -x localhost:1080 %h %p' viyu@<collector-ip>
+
+# Or use proxychains
+proxychains ssh viyu@<collector-ip>
+```
+
+**SSH Config for Port Forwarding:**
+
+```bash
+# Add to ~/.ssh/config
+Host tunnel-host
+    HostName intermediate-host.example.com
+    User tunneluser
+    LocalForward 2222 <collector-ip>:22
+
+# Or with dynamic forwarding
+Host socks-tunnel
+    HostName intermediate-host.example.com
+    User tunneluser
+    DynamicForward 1080
+```
+
+**Common errors and solutions:**
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `bind: Address already in use` | Local port already bound | Choose different port, or kill existing process: `lsof -ti:2222 \| xargs kill` |
+| `channel 2: open failed: connect failed` | Intermediate host can't reach collector | Verify from intermediate host: `nc -zv <collector-ip> 22` |
+| `Permission denied (publickey)` | Authentication to intermediate host failed | Verify SSH keys/password for intermediate host |
+| `Warning: remote port forwarding failed` | Insufficient permissions for remote forwarding | Check `GatewayPorts` in intermediate host's `/etc/ssh/sshd_config` |
+
+**Verification:**
+
+```bash
+# Verify local port forwarding is active
+netstat -an | grep 2222
+# or
+lsof -i :2222
+
+# Test forwarded connection
+ssh -p 2222 viyu@localhost "hostname"
+
+# For dynamic forwarding, test SOCKS proxy
+curl --socks5 localhost:1080 http://<collector-ip>
+
+# Verify tunnel is established
+ssh user@intermediate-host "netstat -an | grep 2222"
+```
+
+**Troubleshooting Port Forwarding:**
+
+```bash
+# Check if SSH tunnel is running
+ps aux | grep "ssh -L"
+
+# Kill hung tunnel
+pkill -f "ssh -L 2222"
+
+# Restart with verbose output for debugging
+ssh -vL 2222:<collector-ip>:22 user@intermediate-host
+
+# Keep tunnel alive with connection options
+ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -L 2222:<collector-ip>:22 user@intermediate-host
+
+# Monitor tunnel activity
+ssh -L 2222:<collector-ip>:22 user@intermediate-host "tail -f /var/log/auth.log"
+```
+
+**Best Practices:**
+
+- **Persistent tunnels:** Use `autossh` for auto-reconnecting tunnels:
+  ```bash
+  autossh -M 0 -fNL 2222:<collector-ip>:22 user@intermediate-host
+  ```
+
+- **Security:** Bind forwarded ports to localhost only (default) to prevent unauthorized access:
+  ```bash
+  ssh -L 127.0.0.1:2222:<collector-ip>:22 user@intermediate-host
+  ```
+
+- **Multiple forwards:** Chain multiple port forwards in one command:
+  ```bash
+  ssh -L 2222:<collector1-ip>:22 -L 2223:<collector2-ip>:22 user@intermediate-host
+  ```
+
 ## Detailed Troubleshooting
 
 For detailed troubleshooting of specific issues, see:
