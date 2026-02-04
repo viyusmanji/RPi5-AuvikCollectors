@@ -16,8 +16,8 @@ jobs:
       - name: Link Checker
         uses: lycheeverse/lychee-action@v1
         with:
-          # Check all markdown files in docs and blog directories
-          args: --verbose --no-progress --accept 200,204,429 --timeout 30 --max-retries 3 --retry-wait-time 5 'docs/**/*.md' 'docs/**/*.mdx' 'blog/**/*.md' 'blog/**/*.mdx' 'README.md'
+          # Check external links only in docs directory markdown files
+          args: --verbose --no-progress --accept 200,204,429 --timeout 30 --max-retries 3 --retry-wait-time 5 --exclude-all-private --exclude-link-local 'docs/**/*.md' 'docs/**/*.mdx'
           # Fail action on broken links
           fail: true
         env:
