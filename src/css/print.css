@@ -1,0 +1,232 @@
+/**
+ * Print styles for Auvik Collector Deployment Guide
+ * Optimizes output for printable checklists and documentation
+ */
+
+@media print {
+  /* Reset page margins */
+  @page {
+    margin: 0.75in;
+    size: letter;
+  }
+
+  /* Hide navigation, footer, theme toggle, and other interactive elements */
+  .navbar,
+  .footer,
+  .theme-toggle,
+  .pagination-nav,
+  .table-of-contents,
+  .breadcrumbs,
+  .edit-page-link,
+  .theme-edit-this-page,
+  .theme-doc-footer,
+  .navbar-sidebar,
+  .menu,
+  [class*='searchBox'],
+  [class*='colorModeToggle'],
+  button[aria-label='Toggle navigation bar'],
+  .theme-back-to-top-button {
+    display: none !important;
+  }
+
+  /* Make main content full width */
+  .main-wrapper {
+    padding: 0 !important;
+  }
+
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  article {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  /* Basic typography for print */
+  body {
+    font-size: 11pt;
+    line-height: 1.5;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  h1 {
+    font-size: 18pt;
+    margin-top: 0;
+  }
+
+  h2 {
+    font-size: 14pt;
+    margin-top: 1em;
+    page-break-after: avoid;
+  }
+
+  h3 {
+    font-size: 12pt;
+    page-break-after: avoid;
+  }
+
+  h4 {
+    font-size: 11pt;
+    page-break-after: avoid;
+  }
+
+  /* Links */
+  a {
+    color: #000 !important;
+    text-decoration: none !important;
+  }
+
+  /* Show URL for external links */
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+  }
+
+  /* But not for internal links */
+  a[href^="#"]:after,
+  a[href^="/"]:after {
+    content: none;
+  }
+
+  /* Code blocks */
+  pre,
+  code {
+    font-size: 9pt;
+    background: #f5f5f5 !important;
+    border: 1px solid #ddd !important;
+    color: #000 !important;
+  }
+
+  pre {
+    padding: 0.5rem !important;
+    page-break-inside: avoid;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  /* Tables */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    page-break-inside: avoid;
+  }
+
+  th,
+  td {
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+    text-align: left;
+  }
+
+  th {
+    background: #f0f0f0 !important;
+    font-weight: 600;
+  }
+
+  /* Admonitions / Alerts */
+  .alert,
+  .admonition,
+  [class*='admonition'] {
+    border: 1px solid #ccc !important;
+    background: #f9f9f9 !important;
+    page-break-inside: avoid;
+    margin: 1rem 0;
+    padding: 0.75rem;
+  }
+
+  /* Keep headings with following content */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  /* Avoid breaking inside important elements */
+  img,
+  figure,
+  table,
+  pre,
+  blockquote,
+  .checklist {
+    page-break-inside: avoid;
+  }
+
+  /* Page breaks before major sections */
+  h2 {
+    page-break-before: auto;
+  }
+
+  /* First h2 shouldn't have a page break */
+  article > h2:first-of-type {
+    page-break-before: avoid;
+  }
+
+  /* Expand collapsed details elements */
+  details {
+    display: block !important;
+  }
+
+  details summary {
+    display: block !important;
+  }
+
+  details[open] summary ~ * {
+    display: block !important;
+  }
+
+  /* Badge styles for print */
+  .badge,
+  [class*='badge'] {
+    border: 1px solid #999 !important;
+    background: transparent !important;
+    color: #000 !important;
+    padding: 0.1rem 0.3rem;
+  }
+
+  /* Image handling */
+  img {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+
+  /* Lists */
+  ul,
+  ol {
+    page-break-inside: avoid;
+  }
+
+  li {
+    page-break-inside: avoid;
+  }
+
+  /* Steps list */
+  .steps-list li::before {
+    background: #f0f0f0 !important;
+    color: #000 !important;
+    border: 1px solid #999;
+  }
+
+  /* Print header - add document title */
+  article::before {
+    content: 'viyu.net - Auvik Collector Deployment Guide';
+    display: block;
+    font-size: 10pt;
+    color: #666;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Print footer - add page info */
+  article::after {
+    content: 'Printed from viyu-net.github.io/viyu_AuvikCollectors';
+    display: block;
+    font-size: 9pt;
+    color: #666;
+    border-top: 1px solid #ccc;
+    padding-top: 0.5rem;
+    margin-top: 2rem;
+  }
+}

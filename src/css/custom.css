@@ -1,0 +1,231 @@
+/**
+ * viyu.net Auvik Collector Deployment Guide
+ * Custom theme styles
+ */
+
+/* Light mode palette - professional blue/indigo */
+:root {
+  --ifm-color-primary: #3b82f6;
+  --ifm-color-primary-dark: #2563eb;
+  --ifm-color-primary-darker: #1d4ed8;
+  --ifm-color-primary-darkest: #1e40af;
+  --ifm-color-primary-light: #60a5fa;
+  --ifm-color-primary-lighter: #93c5fd;
+  --ifm-color-primary-lightest: #bfdbfe;
+
+  --ifm-code-font-size: 0.875rem;
+  --ifm-font-family-monospace: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  --docusaurus-highlighted-code-line-bg: rgba(59, 130, 246, 0.1);
+
+  /* Status colors */
+  --viyu-color-success: #22c55e;
+  --viyu-color-warning: #eab308;
+  --viyu-color-danger: #ef4444;
+  --viyu-color-info: #3b82f6;
+}
+
+/* Dark mode palette - matching the existing index.html design */
+[data-theme='dark'] {
+  --ifm-color-primary: #60a5fa;
+  --ifm-color-primary-dark: #3b82f6;
+  --ifm-color-primary-darker: #2563eb;
+  --ifm-color-primary-darkest: #1d4ed8;
+  --ifm-color-primary-light: #93c5fd;
+  --ifm-color-primary-lighter: #bfdbfe;
+  --ifm-color-primary-lightest: #dbeafe;
+
+  --ifm-background-color: #0c0f14;
+  --ifm-background-surface-color: #141820;
+  --ifm-navbar-background-color: rgba(12, 15, 20, 0.85);
+  --ifm-footer-background-color: #0c0f14;
+
+  --docusaurus-highlighted-code-line-bg: rgba(59, 130, 246, 0.2);
+}
+
+/* Typography improvements */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Navbar styling */
+.navbar {
+  backdrop-filter: blur(20px) saturate(1.5);
+}
+
+[data-theme='dark'] .navbar {
+  border-bottom: 1px solid rgba(42, 48, 64, 0.5);
+}
+
+/* Code block enhancements */
+.prism-code {
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+/* Admonition / Alert styling */
+.alert {
+  border-radius: 8px;
+  border-left-width: 4px;
+}
+
+/* Table improvements */
+table {
+  display: table;
+  width: 100%;
+}
+
+th, td {
+  padding: 0.75rem 1rem;
+}
+
+[data-theme='dark'] th {
+  background: #1a1f2b;
+}
+
+[data-theme='dark'] tbody tr:hover {
+  background: #1a1f2b;
+}
+
+/* Sidebar active item */
+.menu__link--active {
+  font-weight: 600;
+}
+
+/* Better heading anchors */
+.anchor {
+  scroll-margin-top: 80px;
+}
+
+/* Badge styles for use in docs */
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--ifm-font-family-monospace);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+}
+
+.badge--success {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+.badge--warning {
+  background: rgba(234, 179, 8, 0.12);
+  color: #eab308;
+}
+
+.badge--danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.badge--info {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+[data-theme='dark'] .badge--success {
+  color: #4ade80;
+}
+
+[data-theme='dark'] .badge--warning {
+  color: #facc15;
+}
+
+[data-theme='dark'] .badge--danger {
+  color: #f87171;
+}
+
+[data-theme='dark'] .badge--info {
+  color: #60a5fa;
+}
+
+/* Custom admonitions */
+.admonition-critical {
+  --ifm-alert-background-color: rgba(239, 68, 68, 0.1);
+  --ifm-alert-border-color: #ef4444;
+  --ifm-alert-text-color: inherit;
+}
+
+/* Table row highlighting */
+.row-highlight td {
+  background: rgba(59, 130, 246, 0.1) !important;
+  font-weight: 600;
+}
+
+[data-theme='dark'] .row-highlight td {
+  background: rgba(59, 130, 246, 0.15) !important;
+}
+
+/* Steps list styling */
+.steps-list {
+  counter-reset: step;
+  list-style: none;
+  padding-left: 0;
+}
+
+.steps-list li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 3rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.steps-list li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--ifm-color-primary);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Homepage cards if we add them later */
+.feature-card {
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  transition: all 0.15s ease;
+}
+
+.feature-card:hover {
+  border-color: var(--ifm-color-primary);
+  transform: translateY(-2px);
+}
+
+/* Mobile improvements */
+@media (max-width: 996px) {
+  .navbar__title {
+    font-size: 1rem;
+  }
+
+  table {
+    font-size: 0.875rem;
+  }
+
+  th, td {
+    padding: 0.5rem 0.75rem;
+  }
+}

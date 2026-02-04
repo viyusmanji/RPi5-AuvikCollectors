@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pi 5 + Auvik Collector — Deployment Guide | viyu.net</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0C0F14;
+      --bg-elevated: #141820;
+      --bg-card: #1A1F2B;
+      --bg-card-hover: #1F2537;
+      --border: #2A3040;
+      --border-subtle: #1E2333;
+      --text: #E2E5EB;
+      --text-dim: #8B92A0;
+      --text-muted: #5C6370;
+      --accent: #3B82F6;
+      --accent-glow: rgba(59, 130, 246, 0.15);
+      --accent-dim: #2563EB;
+      --green: #22C55E;
+      --green-dim: rgba(34, 197, 94, 0.12);
+      --amber: #F59E0B;
+      --amber-dim: rgba(245, 158, 11, 0.12);
+      --red: #EF4444;
+      --red-dim: rgba(239, 68, 68, 0.12);
+      --purple: #A78BFA;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Top Nav ─── */
+    .topnav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(12, 15, 20, 0.85);
+      backdrop-filter: blur(20px) saturate(1.5);
+      border-bottom: 1px solid var(--border-subtle);
+      height: 56px;
+      display: flex; align-items: center; padding: 0 24px;
+    }
+    .topnav-brand {
+      font-weight: 800; font-size: 14px; letter-spacing: -0.02em;
+      color: var(--text);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .topnav-brand .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .topnav-brand span { color: var(--text-dim); font-weight: 500; }
+    .topnav-links {
+      margin-left: auto; display: flex; gap: 6px;
+    }
+    .topnav-links a {
+      color: var(--text-dim); text-decoration: none; font-size: 13px; font-weight: 500;
+      padding: 6px 12px; border-radius: var(--radius-sm);
+      transition: all 0.15s;
+    }
+    .topnav-links a:hover { color: var(--text); background: var(--bg-card); }
+
+    /* ─── Layout ─── */
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      margin-top: 56px;
+      min-height: calc(100vh - 56px);
+    }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      position: sticky; top: 56px;
+      height: calc(100vh - 56px);
+      overflow-y: auto;
+      border-right: 1px solid var(--border-subtle);
+      padding: 24px 16px;
+      background: var(--bg);
+    }
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .sidebar-section { margin-bottom: 24px; }
+    .sidebar-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-muted); padding: 0 12px; margin-bottom: 8px;
+    }
+    .sidebar a {
+      display: block; padding: 7px 12px; border-radius: var(--radius-sm);
+      color: var(--text-dim); text-decoration: none; font-size: 13px; font-weight: 500;
+      transition: all 0.15s; border-left: 2px solid transparent; margin-bottom: 1px;
+    }
+    .sidebar a:hover { color: var(--text); background: var(--bg-card); }
+    .sidebar a.active { color: var(--accent); background: var(--accent-glow); border-left-color: var(--accent); }
+    .sidebar a .num { color: var(--text-muted); font-family: var(--mono); font-size: 11px; margin-right: 6px; }
+
+    /* ─── Main Content ─── */
+    .main { padding: 40px 48px 80px; max-width: 900px; }
+
+    /* ─── Hero ─── */
+    .hero {
+      margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .hero-eyebrow {
+      font-family: var(--mono); font-size: 12px; font-weight: 500;
+      color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .hero h1 {
+      font-size: 36px; font-weight: 800; letter-spacing: -0.03em;
+      line-height: 1.15; margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--text) 0%, var(--text-dim) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-desc { font-size: 16px; color: var(--text-dim); line-height: 1.7; max-width: 640px; }
+
+    .hero-meta {
+      display: flex; gap: 24px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .hero-meta-item {
+      font-size: 12px; color: var(--text-muted); font-family: var(--mono);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .hero-meta-item .val { color: var(--text-dim); }
+
+    /* ─── Sections ─── */
+    section { margin-bottom: 56px; }
+    section > h2 {
+      font-size: 22px; font-weight: 800; letter-spacing: -0.02em;
+      margin-bottom: 20px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; gap: 10px;
+    }
+    section > h2 .sec-num {
+      font-family: var(--mono); font-size: 13px; font-weight: 600;
+      color: var(--accent); background: var(--accent-glow);
+      padding: 3px 8px; border-radius: var(--radius-sm);
+    }
+    h3 {
+      font-size: 16px; font-weight: 700; margin: 28px 0 12px;
+      color: var(--text); letter-spacing: -0.01em;
+    }
+    p { margin-bottom: 14px; color: var(--text-dim); }
+    p strong { color: var(--text); font-weight: 600; }
+
+    /* ─── Tables ─── */
+    .table-wrap {
+      overflow-x: auto; margin: 16px 0 24px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      background: var(--bg-card); color: var(--text);
+      font-weight: 600; text-align: left;
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    tbody td {
+      padding: 10px 14px; border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-dim); vertical-align: top;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--bg-card); }
+    td code, th code {
+      font-family: var(--mono); font-size: 12px;
+      background: var(--bg); padding: 2px 6px; border-radius: 4px;
+      color: var(--purple);
+    }
+
+    /* ─── Cards ─── */
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; margin: 16px 0;
+    }
+    .card-title {
+      font-size: 13px; font-weight: 700; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ─── Alert Boxes ─── */
+    .alert {
+      border-radius: var(--radius); padding: 16px 20px; margin: 16px 0;
+      font-size: 13px; line-height: 1.6; border-left: 3px solid;
+    }
+    .alert-title { font-weight: 700; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .alert-info { background: var(--accent-glow); border-color: var(--accent); }
+    .alert-info .alert-title { color: var(--accent); }
+    .alert-warn { background: var(--amber-dim); border-color: var(--amber); }
+    .alert-warn .alert-title { color: var(--amber); }
+    .alert-danger { background: var(--red-dim); border-color: var(--red); }
+    .alert-danger .alert-title { color: var(--red); }
+    .alert-success { background: var(--green-dim); border-color: var(--green); }
+    .alert-success .alert-title { color: var(--green); }
+
+    /* ─── Code Blocks ─── */
+    pre {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 20px;
+      overflow-x: auto; margin: 12px 0 20px;
+      font-family: var(--mono); font-size: 13px; line-height: 1.7;
+      color: var(--text-dim);
+    }
+    code { font-family: var(--mono); }
+    p code, li code {
+      font-size: 13px; background: var(--bg-card); border: 1px solid var(--border-subtle);
+      padding: 2px 7px; border-radius: 4px; color: var(--purple);
+    }
+
+    /* ─── Lists ─── */
+    ul, ol { margin: 8px 0 16px 20px; color: var(--text-dim); }
+    li { margin-bottom: 6px; padding-left: 4px; }
+    li::marker { color: var(--text-muted); }
+
+    /* ─── Checklist ─── */
+    .checklist { list-style: none; margin-left: 0; }
+    .checklist li {
+      padding: 8px 12px; border-radius: var(--radius-sm);
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-bottom: 4px; font-size: 13px;
+    }
+    .checklist li:hover { background: var(--bg-card); }
+    .checklist li::before {
+      content: ''; display: inline-block; flex-shrink: 0;
+      width: 18px; height: 18px; margin-top: 2px;
+      border: 2px solid var(--border); border-radius: 4px;
+      background: var(--bg);
+    }
+
+    /* ─── Badges ─── */
+    .badge {
+      display: inline-block; font-size: 11px; font-weight: 600; font-family: var(--mono);
+      padding: 3px 8px; border-radius: 4px; letter-spacing: 0.02em;
+    }
+    .badge-green { background: var(--green-dim); color: var(--green); }
+    .badge-amber { background: var(--amber-dim); color: var(--amber); }
+    .badge-red { background: var(--red-dim); color: var(--red); }
+    .badge-blue { background: var(--accent-glow); color: var(--accent); }
+
+    /* ─── Links ─── */
+    a.ref-link {
+      color: var(--accent); text-decoration: none;
+      border-bottom: 1px solid transparent; transition: border-color 0.15s;
+    }
+    a.ref-link:hover { border-bottom-color: var(--accent); }
+
+    /* ─── Steps ─── */
+    .steps { counter-reset: step; list-style: none; margin-left: 0; }
+    .steps li {
+      counter-increment: step; position: relative;
+      padding: 12px 12px 12px 52px; margin-bottom: 8px;
+      border-radius: var(--radius-sm); font-size: 14px;
+    }
+    .steps li:hover { background: var(--bg-card); }
+    .steps li::before {
+      content: counter(step);
+      position: absolute; left: 12px; top: 12px;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--accent-glow); color: var(--accent);
+      font-family: var(--mono); font-size: 12px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ─── Pricing highlight row ─── */
+    .row-highlight td { background: var(--accent-glow) !important; color: var(--text) !important; font-weight: 600; }
+
+    /* ─── Footer ─── */
+    .footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 24px 0; margin-top: 40px;
+      font-size: 12px; color: var(--text-muted);
+      display: flex; justify-content: space-between;
+    }
+
+    /* ─── Mobile ─── */
+    .mobile-toggle { display: none; }
+
+    @media (max-width: 840px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed; left: -280px; top: 56px; width: 270px; z-index: 90;
+        background: var(--bg); transition: left 0.25s ease;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.4);
+      }
+      .sidebar.open { left: 0; }
+      .main { padding: 28px 20px 60px; }
+      .hero h1 { font-size: 26px; }
+      .topnav-links { display: none; }
+      .mobile-toggle {
+        display: flex; margin-left: auto;
+        background: none; border: none; color: var(--text-dim); cursor: pointer;
+        padding: 8px;
+      }
+      .mobile-toggle svg { width: 22px; height: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top Nav -->
+<nav class="topnav">
+  <div class="topnav-brand">
+    <div class="dot"></div>
+    viyu.net <span>/ deployment-guides / pi5-auvik</span>
+  </div>
+  <div class="topnav-links">
+    <a href="#overview">Overview</a>
+    <a href="#hardware">Hardware</a>
+    <a href="#install">Install</a>
+    <a href="#checklist">Checklist</a>
+  </div>
+  <button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Toggle navigation">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+  </button>
+</nav>
+
+<!-- Layout -->
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" onclick="if(window.innerWidth<=840)this.classList.remove('open')">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Getting Started</div>
+      <a href="#overview" class="active"><span class="num">01</span> Overview</a>
+      <a href="#hardware"><span class="num">02</span> Hardware BOM</a>
+      <a href="#os-config"><span class="num">03</span> OS &amp; Configuration</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Installation</div>
+      <a href="#install"><span class="num">04</span> Auvik Collector Install</a>
+      <a href="#network"><span class="num">05</span> Network Configuration</a>
+      <a href="#remote-access"><span class="num">06</span> Remote Access</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Operations</div>
+      <a href="#golden-image"><span class="num">07</span> Golden Image</a>
+      <a href="#checklist"><span class="num">08</span> Deployment Checklist</a>
+      <a href="#troubleshooting"><span class="num">09</span> Troubleshooting</a>
+      <a href="#maintenance"><span class="num">10</span> Maintenance</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Reference</div>
+      <a href="#cost-analysis"><span class="num">11</span> Cost Analysis</a>
+      <a href="#auvik-docs"><span class="num">12</span> Auvik Documentation</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Hero -->
+    <div class="hero" id="overview">
+      <div class="hero-eyebrow">viyu.net — Technician Reference</div>
+      <h1>Raspberry Pi 5 + Auvik Collector<br>Deployment Guide</h1>
+      <p class="hero-desc">Standard operating procedure for deploying Raspberry Pi 5 devices with PoE+ HATs as dedicated Auvik network monitoring collectors at client sites. A single Ethernet cable delivers both power and data — no additional infrastructure required.</p>
+      <div class="hero-meta">
+        <div class="hero-meta-item">Version <span class="val">1.0</span></div>
+        <div class="hero-meta-item">Updated <span class="val">2026-02-03</span></div>
+        <div class="hero-meta-item">Platform <span class="val">ARM64 / Bookworm</span></div>
+        <div class="hero-meta-item">Status <span class="badge badge-green">Active</span></div>
+      </div>
+    </div>
+
+    <div class="alert alert-info">
+      <div class="alert-title">About This Guide</div>
+      This is a public technician reference document. It covers hardware selection, OS configuration, Auvik collector installation, networking requirements, and field deployment procedures for the Pi 5 + PoE + Auvik stack.
+    </div>
+
+    <!-- ═══ HARDWARE BOM ═══ -->
+    <section id="hardware">
+      <h2><span class="sec-num">02</span> Hardware Bill of Materials</h2>
+      <p>The following components make up the standard deployment kit per client site. All pricing reflects current MSRP as of February 2026, including recent DRAM shortage-driven increases.</p>
+
+      <div class="alert alert-warn">
+        <div class="alert-title">Pricing Notice — DRAM Shortage</div>
+        Raspberry Pi raised prices effective February 2, 2026 due to ongoing memory cost pressures driven by AI infrastructure demand. The Pi 5 8GB is now <strong>$125</strong> (up from $80 pre-shortage). Monitor <a class="ref-link" href="https://www.raspberrypi.com/news/" target="_blank">raspberrypi.com/news</a> for future adjustments. Prices are expected to normalize once the DRAM shortage resolves.
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Component</th><th>Specification</th><th>Est. Cost</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr class="row-highlight"><td>Raspberry Pi 5</td><td>8GB RAM</td><td>$125</td><td>8GB recommended for collector headroom. 4GB ($85) viable for small sites (&lt;100 devices).</td></tr>
+            <tr><td>PoE+ HAT (3rd party)</td><td>802.3af/at, Pi 5 compatible</td><td>$25–$45</td><td>GeeekPi P30, Waveshare PoE HAT (F), or 52Pi. <strong>No official RPi Foundation Pi 5 PoE HAT exists yet.</strong></td></tr>
+            <tr><td>microSD Card</td><td>32GB+, A2 rated</td><td>$10–$15</td><td>Samsung EVO Select or SanDisk Extreme. A2 rating critical for random I/O.</td></tr>
+            <tr><td>Case</td><td>Enclosed, vented, PoE HAT clearance</td><td>$10–$20</td><td>Must accommodate PoE HAT stack height. Verify compatibility with specific HAT model.</td></tr>
+            <tr><td>Ethernet Patch Cable</td><td>Cat6, 3–6 ft</td><td>$3–$5</td><td>Short run to PoE switch port.</td></tr>
+            <tr><td>Asset Label</td><td>Printed adhesive</td><td>~$1</td><td>Hostname, client, IP, Auvik site name.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>Estimated per-site cost: $175–$210</strong> (8GB config with third-party PoE+ HAT)</p>
+
+      <h3>Optional Add-ons</h3>
+      <ul>
+        <li><strong>NVMe SSD + M.2 HAT:</strong> For sites with SD card reliability concerns. Some combo PoE+NVMe HATs exist (GeeekPi P33) that stack both — evaluate case compatibility.</li>
+        <li><strong>USB-C 27W Power Supply:</strong> Keep one per tech bag as a PoE fallback if client switch doesn't support 802.3at or has insufficient power budget.</li>
+      </ul>
+
+      <h3>PoE Switch Compatibility</h3>
+      <div class="alert alert-danger">
+        <div class="alert-title">Critical</div>
+        Verify the client switch supports <strong>802.3at (PoE+)</strong> on the target port. Most Pi 5 PoE HATs will not negotiate on 802.3af-only ports. Check the switch power budget — especially on switches with many PoE devices already consuming wattage.
+      </div>
+    </section>
+
+    <!-- ═══ OS CONFIG ═══ -->
+    <section id="os-config">
+      <h2><span class="sec-num">03</span> OS &amp; Configuration</h2>
+      <p>All deployments use <strong>Raspberry Pi OS Lite (64-bit)</strong> based on Debian 12 Bookworm — the minimum supported OS per Auvik documentation. Ubuntu Server 24.04 LTS (ARM64) is also acceptable.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Parameter</th><th>Standard Value</th></tr></thead>
+          <tbody>
+            <tr><td>OS</td><td>Raspberry Pi OS Lite (64-bit) — Bookworm</td></tr>
+            <tr><td>Hostname</td><td><code>auvik-{clientcode}-{sitecode}</code> &nbsp;(e.g., <code>auvik-ifs-hq</code>)</td></tr>
+            <tr><td>Admin User</td><td><code>viyuadmin</code> — password stored in documentation platform</td></tr>
+            <tr><td>SSH</td><td>Enabled — key-based auth only, password auth disabled</td></tr>
+            <tr><td>Timezone</td><td>Client site local (e.g., <code>America/Chicago</code>)</td></tr>
+            <tr><td>Auto-Updates</td><td><code>unattended-upgrades</code> enabled for security patches</td></tr>
+            <tr><td>Firewall</td><td><code>ufw</code> — allow SSH inbound from mgmt, allow all outbound HTTPS (443)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>System Requirements — Auvik Minimum vs. Pi 5</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Resource</th><th>Auvik Minimum</th><th>Pi 5 (8GB)</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>CPU</td><td>2 cores @ 2 GHz</td><td>4 cores @ 2.4 GHz</td><td><span class="badge badge-green">Exceeds</span></td></tr>
+            <tr><td>RAM</td><td>4 GB</td><td>8 GB</td><td><span class="badge badge-green">Exceeds</span></td></tr>
+            <tr><td>Storage</td><td>12 GB free</td><td>32 GB microSD</td><td><span class="badge badge-green">Exceeds</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══ AUVIK INSTALL ═══ -->
+    <section id="install">
+      <h2><span class="sec-num">04</span> Auvik Collector Installation</h2>
+      <p>Auvik supports two officially documented methods for ARM64 / Raspberry Pi deployments. For dedicated single-purpose Pis (our standard), use the <strong>Bash Script Install</strong>.</p>
+
+      <div class="card">
+        <div class="card-title"><span class="badge badge-blue">Recommended</span> &nbsp;Native Bash Script Install</div>
+        <p>The collector takes over the entire machine — no other workloads can run. This is the intended model for a dedicated Pi collector appliance.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="badge badge-amber">Alternative</span> &nbsp;Docker Container</div>
+        <p>Use only if the Pi will run additional workloads alongside Auvik. The ARM64 Docker image is available on Docker Hub (<code>latest</code> tag). The collector auto-detects ARM64 — no emulation needed.</p>
+      </div>
+
+      <h3>Bash Script Installation Steps</h3>
+      <ol class="steps">
+        <li>Flash <strong>Raspberry Pi OS Lite (64-bit)</strong> to the microSD card using Raspberry Pi Imager. Pre-configure hostname, SSH key, and locale via the imager's advanced settings (Ctrl+Shift+X).</li>
+        <li>Insert the microSD, connect Ethernet to a PoE+ switch port, and allow the device to boot. Confirm power via PoE (no USB-C cable needed).</li>
+        <li>SSH into the Pi: <code>ssh viyuadmin@{ip-address}</code>. Verify network connectivity: <code>ping 8.8.8.8</code> and <code>curl -I https://auvik.com</code>.</li>
+        <li>Log into <strong>Auvik</strong> → navigate to the target client/site → click <strong>Add Collector</strong> → select <strong>Bash Script</strong>.</li>
+        <li>Copy the generated install command (it contains the site-specific token). Run it via SSH on the Pi.</li>
+        <li>The script installs the collector agent and reboots the device. After reboot, the collector should appear <strong>online</strong> in the Auvik dashboard within 5–10 minutes.</li>
+        <li>Verify device discovery is populating — switches, APs, firewalls should begin appearing on the network map.</li>
+      </ol>
+
+      <div class="alert alert-info">
+        <div class="alert-title">Pi OS Shortcut</div>
+        Per Auvik docs: if the Pi is already running a supported Ubuntu OS or Raspberry Pi OS, you can skip straight to step 4 and run the installation script directly.
+      </div>
+    </section>
+
+    <!-- ═══ NETWORK ═══ -->
+    <section id="network">
+      <h2><span class="sec-num">05</span> Network Configuration</h2>
+
+      <h3>IP Addressing</h3>
+      <p>Each Pi requires a <strong>static IP</strong> or <strong>DHCP reservation</strong>. Static is preferred. Record the IP in your documentation platform under the client site record.</p>
+
+      <h3>VLAN Placement</h3>
+      <p>Place the Pi on the <strong>management VLAN</strong> with inter-VLAN routing to all monitored subnets. The Auvik collector uses SNMP, WMI, and other discovery protocols that require Layer 3 reachability. If the client uses strict segmentation, configure ACLs to allow the Pi's IP to reach target devices.</p>
+
+      <h3>Firewall / Outbound Access</h3>
+      <p>The collector requires <strong>outbound HTTPS (TCP 443)</strong> to Auvik's cloud. No inbound ports from the internet are needed. Verify the client firewall does not block or SSL-inspect traffic from the collector's IP. If a web proxy exists, configure the collector accordingly per Auvik's proxy documentation.</p>
+
+      <h3>SNMP Configuration</h3>
+      <p>Enable SNMP on all managed infrastructure — switches, routers, firewalls, access points. Configure SNMPv2c (community string) or preferably <strong>SNMPv3</strong> (auth + encryption). Add the Pi's static IP to each device's allowed SNMP hosts list. Enter credentials in Auvik under the client site's credentials section.</p>
+    </section>
+
+    <!-- ═══ REMOTE ACCESS ═══ -->
+    <section id="remote-access">
+      <h2><span class="sec-num">06</span> Remote Access</h2>
+      <p>Since the Auvik bash script takes over the Pi, traditional RMM agents may not be installable after deployment. Set up remote access <strong>before</strong> running the Auvik install.</p>
+
+      <h3>Option A — Tailscale (Recommended)</h3>
+      <p>Install Tailscale before deploying the Auvik collector. It provides a persistent mesh VPN tunnel back to the management network with zero-config NAT traversal. Every deployed Pi appears in the Tailscale admin console for SSH access and health monitoring.</p>
+      <pre>curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up --ssh</pre>
+
+      <h3>Option B — ZeroTier</h3>
+      <p>Alternative mesh VPN if Tailscale is not viable. Same concept — persistent overlay network for remote SSH.</p>
+
+      <h3>Option C — Reverse SSH Tunnel</h3>
+      <p>If no mesh VPN is feasible, configure a persistent reverse SSH tunnel via <code>autossh</code> or a systemd service to a viyu.net jump host.</p>
+
+      <div class="alert alert-success">
+        <div class="alert-title">Auvik Offline Alerts</div>
+        Auvik automatically alerts when a collector goes offline. Configure notifications to your NOC/operations channel (email, Slack, or Teams) so collector outages are caught regardless of remote access method.
+      </div>
+    </section>
+
+    <!-- ═══ GOLDEN IMAGE ═══ -->
+    <section id="golden-image">
+      <h2><span class="sec-num">07</span> Golden Image &amp; Provisioning</h2>
+      <p>Build a reusable base image to enable fast, repeatable deployments across sites.</p>
+
+      <h3>Golden Image Contents</h3>
+      <ol>
+        <li>Raspberry Pi OS Lite (64-bit) — Bookworm, fully updated</li>
+        <li>SSH enabled with authorized keys pre-loaded (password auth disabled)</li>
+        <li><code>viyuadmin</code> account with sudo privileges</li>
+        <li><code>ufw</code> firewall: allow SSH inbound, allow all outbound</li>
+        <li><code>unattended-upgrades</code> installed and configured</li>
+        <li>Tailscale installed and authenticated to the org Tailnet</li>
+        <li>Hostname set to <code>auvik-TEMPLATE</code> (placeholder for cloning)</li>
+        <li>Hardware watchdog timer enabled (<code>/dev/watchdog</code>) for auto-reboot on hangs</li>
+      </ol>
+
+      <h3>Per-Client Customization</h3>
+      <p>After cloning the golden image to a new microSD, customize these before deployment:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Setting</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>Hostname</td><td>Set to <code>auvik-{clientcode}-{sitecode}</code></td></tr>
+            <tr><td>Static IP</td><td>Configure static IP or document DHCP reservation</td></tr>
+            <tr><td>Timezone</td><td>Set to client local timezone</td></tr>
+            <tr><td>Auvik Collector</td><td>Run site-specific bash install script from Auvik portal</td></tr>
+            <tr><td>Documentation</td><td>Record hostname, IP, MAC, serial, Auvik site in documentation platform</td></tr>
+            <tr><td>Asset Label</td><td>Print and apply physical label to device</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Cloning Process</h3>
+      <ol class="steps">
+        <li>Insert the golden image microSD into a USB reader on a workstation.</li>
+        <li>Clone using Raspberry Pi Imager (custom image option) or balenaEtcher to the target microSD.</li>
+        <li>Boot the Pi with the cloned card, SSH in, run per-client customizations.</li>
+        <li>Run the Auvik bash install script for the target client site.</li>
+        <li>Verify collector is online in Auvik, then shut down and package for deployment.</li>
+      </ol>
+    </section>
+
+    <!-- ═══ CHECKLIST ═══ -->
+    <section id="checklist">
+      <h2><span class="sec-num">08</span> Deployment Checklist</h2>
+      <p>Use this during each deployment to ensure nothing is missed.</p>
+
+      <h3>Pre-Deployment (Office)</h3>
+      <ul class="checklist">
+        <li>Hardware kit assembled — Pi 5, PoE HAT, case, microSD, patch cable, label</li>
+        <li>Golden image cloned to microSD</li>
+        <li>Per-client config applied — hostname, IP, timezone</li>
+        <li>Auvik collector installed and verified online in portal</li>
+        <li>Tailscale / ZeroTier remote access tested from management network</li>
+        <li>Client SNMP credentials obtained and entered in Auvik</li>
+        <li>Asset label printed and applied to device</li>
+        <li>USB-C backup power supply in tech bag</li>
+      </ul>
+
+      <h3>On-Site Installation</h3>
+      <ul class="checklist">
+        <li>Verify client switch port supports 802.3at PoE+ with available power budget</li>
+        <li>Connect Pi to designated switch port via Cat6 patch cable</li>
+        <li>Confirm Pi powers on via PoE — activity LEDs, no separate PSU</li>
+        <li>Verify connectivity — <code>ping gateway</code>, <code>ping 8.8.8.8</code>, <code>curl https://auvik.com</code></li>
+        <li>Confirm Auvik collector shows online in portal</li>
+        <li>Verify device discovery populating — switches, APs, firewalls appearing</li>
+        <li>Confirm Tailscale/ZeroTier tunnel is active from management network</li>
+        <li>Mount/secure Pi in rack, shelf, or bracket</li>
+        <li>Update client documentation with deployment details</li>
+        <li>Photograph installed Pi for records</li>
+      </ul>
+
+      <h3>Post-Deployment (24–48 Hours)</h3>
+      <ul class="checklist">
+        <li>Auvik collector still online and reporting</li>
+        <li>Network topology map populating correctly</li>
+        <li>Auvik offline alert configured for this collector</li>
+        <li>Remote access confirmed working from outside client network</li>
+      </ul>
+    </section>
+
+    <!-- ═══ TROUBLESHOOTING ═══ -->
+    <section id="troubleshooting">
+      <h2><span class="sec-num">09</span> Troubleshooting</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="width:25%">Symptom</th><th style="width:35%">Likely Cause</th><th style="width:40%">Resolution</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Pi does not power on</td>
+              <td>Switch port is 802.3af-only, or PoE power budget exhausted</td>
+              <td>Verify 802.3at support. Check switch PoE allocation. Test with USB-C 27W PSU to isolate.</td>
+            </tr>
+            <tr>
+              <td>Collector offline in Auvik</td>
+              <td>Network issue, Pi crash, SD card failure</td>
+              <td>Check Tailscale device status. Attempt SSH. If unreachable, dispatch tech to verify power/connectivity on-site.</td>
+            </tr>
+            <tr>
+              <td>No device discovery</td>
+              <td>SNMP not enabled, wrong credentials, or VLAN isolation</td>
+              <td>Verify SNMP config on target devices. Confirm Pi's IP is in allowed hosts. Check inter-VLAN ACLs.</td>
+            </tr>
+            <tr>
+              <td>High CPU / memory usage</td>
+              <td>Site exceeds Pi capacity (&gt;200 devices, &gt;9000 interfaces)</td>
+              <td>Review Auvik device/interface counts. Scale to x86 VM if thresholds are exceeded.</td>
+            </tr>
+            <tr>
+              <td>Tailscale not connecting</td>
+              <td>Client firewall blocking outbound to Tailscale control plane</td>
+              <td>Verify outbound HTTPS. Check for SSL inspection. Whitelist Tailscale coordination server domains.</td>
+            </tr>
+            <tr>
+              <td>SD card corruption</td>
+              <td>Write wear-out or unexpected power loss</td>
+              <td>Re-flash from golden image. Apply per-client config. For repeat failures, evaluate NVMe upgrade.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══ MAINTENANCE ═══ -->
+    <section id="maintenance">
+      <h2><span class="sec-num">10</span> Ongoing Maintenance</h2>
+
+      <h3>OS Updates</h3>
+      <p>With <code>unattended-upgrades</code> enabled, security patches apply automatically. Quarterly, SSH into each Pi to verify system health, check disk usage (<code>df -h</code>), and review logs. Automate across all deployed Pis via Tailscale SSH.</p>
+
+      <h3>Hardware Watchdog</h3>
+      <p>The Pi 5 hardware watchdog is configured in the golden image. It auto-reboots the device on system hangs — no post-deployment intervention needed.</p>
+
+      <h3>SD Card Lifecycle</h3>
+      <p>Plan preventive replacement every <strong>2–3 years</strong>. The Auvik collector is not write-heavy, but OS logging and updates accumulate. If a site has repeat SD failures, upgrade to NVMe.</p>
+
+      <h3>Capacity Thresholds</h3>
+      <p>Monitor in Auvik. If a site approaches <strong>200 devices</strong> or <strong>9,000 interfaces</strong>, the Pi may not keep up. At that scale, migrate the collector to a dedicated x86 VM.</p>
+    </section>
+
+    <!-- ═══ COST ANALYSIS ═══ -->
+    <section id="cost-analysis">
+      <h2><span class="sec-num">11</span> Cost Analysis</h2>
+      <p>Comparison of collector deployment platforms at current pricing (February 2026).</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Platform</th><th>Hardware Cost</th><th>Power Draw</th><th>Form Factor</th><th>Verdict</th></tr></thead>
+          <tbody>
+            <tr class="row-highlight">
+              <td>Raspberry Pi 5 (8GB) + PoE</td>
+              <td>$175–$210</td>
+              <td>5–12W</td>
+              <td>Credit card size</td>
+              <td><span class="badge badge-green">Recommended</span></td>
+            </tr>
+            <tr>
+              <td>Raspberry Pi 5 (4GB) + PoE</td>
+              <td>$125–$165</td>
+              <td>5–12W</td>
+              <td>Credit card size</td>
+              <td><span class="badge badge-blue">Budget option</span></td>
+            </tr>
+            <tr>
+              <td>Intel NUC / Mini PC</td>
+              <td>$300–$500</td>
+              <td>15–40W</td>
+              <td>Small desktop</td>
+              <td><span class="badge badge-amber">Overkill</span></td>
+            </tr>
+            <tr>
+              <td>On-prem server VM</td>
+              <td>$0 (existing)</td>
+              <td>Shared</td>
+              <td>Virtual</td>
+              <td><span class="badge badge-amber">Requires server on-site</span></td>
+            </tr>
+            <tr>
+              <td>Cloud VM (Azure / AWS)</td>
+              <td>$30–$60/mo</td>
+              <td>N/A</td>
+              <td>Virtual</td>
+              <td><span class="badge badge-red">Cannot monitor LAN</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══ AUVIK DOCS ═══ -->
+    <section id="auvik-docs">
+      <h2><span class="sec-num">12</span> Auvik Reference Documentation</h2>
+      <p>Authoritative sources from Auvik Support for this deployment model:</p>
+      <ul>
+        <li><a class="ref-link" href="https://support.auvik.com/hc/en-us/articles/28775790530964" target="_blank">ARM64 (Raspberry Pi) FAQ</a> — Deployment options, supported devices, Docker vs. native</li>
+        <li><a class="ref-link" href="https://support.auvik.com/hc/en-us/articles/204822246" target="_blank">Bash Script Installation Guide</a> — Step-by-step collector install for Pi / VM</li>
+        <li><a class="ref-link" href="https://support.auvik.com/hc/en-us/articles/200741514" target="_blank">Collector System Requirements</a> — CPU, RAM, storage minimums and scaling guidance</li>
+        <li><a class="ref-link" href="https://support.auvik.com/hc/en-us/articles/18616185672852" target="_blank">Docker FAQ</a> — Docker image details, ARM64 native support, OS compatibility</li>
+        <li><a class="ref-link" href="https://support.auvik.com/hc/en-us/articles/28775088355348" target="_blank">Step 7: Deploy ARM64 Collector on Raspberry Pi</a> — Auvik's official Pi deployment overview</li>
+        <li><a class="ref-link" href="https://www.auvik.com/franklyit/webinars/demo-on-demand-arm64-collector/" target="_blank">ARM64 Collector Demo (On-Demand)</a> — Video walkthrough of the deployment process</li>
+      </ul>
+    </section>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span>viyu.net — Internal Deployment Guide</span>
+      <span>Last updated: February 3, 2026</span>
+    </div>
+
+  </main>
+</div>
+
+<!-- Sidebar Active Link Tracking -->
+<script>
+  const sections = document.querySelectorAll('section[id], .hero[id]');
+  const links = document.querySelectorAll('.sidebar a[href^="#"]');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const target = document.querySelector(`.sidebar a[href="#${e.target.id}"]`);
+        if (target) target.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
