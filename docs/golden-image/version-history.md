@@ -53,6 +53,7 @@ auvik-golden-v{MAJOR}.{MINOR}.{PATCH}-{YYYY-MM-DD}.img
 | Tailscale | Latest (auto-update enabled) | Installed from official repo |
 | UFW | 0.36.2 | Default Bookworm package |
 | unattended-upgrades | 2.9.1 | Security patches only |
+| watchdog | 5.16 | Default Bookworm package |
 | Python | 3.11.2 | System default |
 | Docker | Not included | Installed per-site if needed |
 
@@ -64,13 +65,17 @@ auvik-golden-v{MAJOR}.{MINOR}.{PATCH}-{YYYY-MM-DD}.img
 - **Auto-Updates:** Enabled for security patches
 - **Watchdog:** Hardware watchdog configured
 - **Hostname:** `auvik-TEMPLATE` (placeholder for cloning)
+- **Version File:** `/etc/golden-image-version` contains "1.0.0"
+- **Version Check Script:** `/usr/local/bin/version-check.sh` for remote version auditing
 
 #### Included Services
 
-- Tailscale mesh VPN (requires authentication per-site)
-- SSH server with hardened configuration
-- Hardware watchdog for automatic recovery
-- NTP time synchronization
+- **Tailscale:** Mesh VPN for remote access (requires authentication per-site)
+- **SSH Server:** Hardened configuration with key-based auth only
+- **Hardware Watchdog:** Automatic recovery on system hang
+- **UFW Firewall:** Deny incoming (except SSH), allow outgoing
+- **Unattended Upgrades:** Automatic security patch installation
+- **NTP:** Time synchronization (systemd-timesyncd)
 
 #### Not Included (Per-Site Installation)
 
@@ -89,6 +94,32 @@ None at release.
 - Only viyu.net deployment key authorized
 - Firewall blocks all incoming except SSH
 - Automatic security updates enabled
+
+#### Build Artifacts
+
+**Image File:** `auvik-golden-v1.0.0-2026-02-03.img`
+**Size:** ~3.2 GB (compressed), ~32 GB (uncompressed)
+**SHA256 Checksum:** Generated and stored with image file
+
+**Storage Locations:**
+- Primary NAS/file server (versioned)
+- Technician laptop copies
+- Cloud backup storage
+
+#### Components Summary
+
+All components from [image-contents.md](/docs/golden-image/image-contents) documentation:
+
+✓ Raspberry Pi OS Lite (64-bit) Bookworm — fully updated
+✓ SSH with authorized keys pre-loaded, password auth disabled
+✓ Admin account `viyuadmin` with sudo privileges
+✓ UFW firewall configured (allow SSH, allow all outbound)
+✓ Unattended-upgrades for security patches
+✓ Tailscale installed and authenticated
+✓ Hardware watchdog enabled for auto-recovery
+✓ Hostname set to `auvik-TEMPLATE`
+✓ Version file at `/etc/golden-image-version`
+✓ Version check script at `/usr/local/bin/version-check.sh`
 
 ---
 
