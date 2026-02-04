@@ -57,7 +57,6 @@ const sidebars: SidebarsConfig = {
         'golden-image/image-contents',
         'golden-image/per-client-customization',
         'golden-image/cloning-process',
-        'golden-image/update-procedures',
         'golden-image/version-history',
       ],
     },
@@ -100,6 +99,13 @@ const sidebars: SidebarsConfig = {
         'reference/cost-analysis',
         'reference/auvik-documentation',
         'reference/glossary',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Documentation Strategy',
+      items: [
+        'documentation-strategy/external-references-guide',
       ],
     },
     {
