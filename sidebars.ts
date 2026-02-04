@@ -38,6 +38,7 @@ const sidebars: SidebarsConfig = {
         'network/vlan-placement',
         'network/firewall-rules',
         'network/snmp-configuration',
+        'network/complex-scenarios',
       ],
     },
     {
