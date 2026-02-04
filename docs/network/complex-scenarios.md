@@ -207,11 +207,23 @@ ip route show
 
 ### Challenge
 
-Client requires monitoring of DMZ-hosted services (web servers, email gateways) but security policy prohibits DMZ-to-internal traffic.
+Client requires monitoring of DMZ-hosted services (web servers, email gateways, public-facing infrastructure) but security policy prohibits DMZ-to-internal traffic. DMZ networks are designed for defense-in-depth, isolating public-facing services from internal networks.
 
-### Solution: Dual Collector Setup
+**Common DMZ Use Cases:**
+- Public web servers and application servers
+- Email gateways (SMTP relays, spam filters)
+- VPN concentrators and remote access gateways
+- DNS servers (external resolvers)
+- Load balancers and reverse proxies
+- FTP/SFTP servers
 
-Deploy **two collectors**:
+### Placement Strategies
+
+There are three approaches to monitoring DMZ infrastructure, each with different security and operational trade-offs:
+
+#### Strategy 1: Dual Collector Setup (Most Secure)
+
+Deploy **two separate collectors**:
 
 1. **Internal Collector** (Management VLAN) — Monitors internal infrastructure
 2. **DMZ Collector** (DMZ VLAN) — Monitors DMZ devices only
@@ -229,39 +241,507 @@ Deploy **two collectors**:
       ┌─────▼──────┐              ┌───────▼─────┐
       │    DMZ     │              │   Internal  │
       │  VLAN 99   │              │  VLANs      │
+      │ 172.16.1./24│             │  10.10.x./24│
       │            │              │             │
       │ [Collector]│              │ [Collector] │
+      │ 172.16.1.50│              │ 10.10.10.50 │
       │ [Web Srv]  │              │ [Switches]  │
       │ [Mail Gw]  │              │ [Servers]   │
+      │ [VPN]      │              │ [Firewall]  │
       └────────────┘              └─────────────┘
 ```
 
-### DMZ Collector Configuration
+**Pros:**
+- ✅ Complete network isolation maintained
+- ✅ No DMZ-to-internal or internal-to-DMZ firewall rules needed
+- ✅ Meets strictest security policies (PCI-DSS, HIPAA, SOC 2)
+- ✅ DMZ breach does not compromise internal monitoring
 
-**Firewall Rules:**
+**Cons:**
+- ❌ Additional hardware cost (second Pi)
+- ❌ Two collectors to manage and maintain
+- ❌ Separate Auvik sites or multi-collector configuration
+
+**Best for:** High-security environments, compliance-driven networks, clients with strict DMZ isolation policies
+
+#### Strategy 2: Internal Collector with Limited DMZ Access (Common)
+
+Place the collector on the **internal management VLAN** and create a **firewall exception** allowing read-only monitoring access to the DMZ.
+
+```
+                        Internet
+                           │
+                           ▼
+                   ┌───────────────┐
+                   │   Firewall    │
+                   │               │
+                   │  Rule: Allow  │
+                   │  10.10.10.50  │
+                   │  → DMZ:161    │
+                   └───┬───────┬───┘
+                       │       │
+                       │       │ Limited Access
+            ┌──────────┘       └──────────┐
+            │                             │
+      ┌─────▼──────┐              ┌───────▼─────┐
+      │    DMZ     │              │   Internal  │
+      │  VLAN 99   │◄─────────────│  Management │
+      │ 172.16.1./24│   SNMP only │ 10.10.10./24│
+      │            │              │             │
+      │ [Web Srv]  │              │ [Collector] │
+      │ [Mail Gw]  │              │ 10.10.10.50 │
+      │ [VPN]      │              │ [Switches]  │
+      └────────────┘              └─────────────┘
+```
+
+**Pros:**
+- ✅ Single collector (lower cost)
+- ✅ Unified monitoring view in Auvik
+- ✅ Easier to manage
+
+**Cons:**
+- ❌ Creates firewall exception between security zones
+- ❌ May not satisfy strictest security policies
+- ❌ Requires careful rule scoping and logging
+
+**Best for:** Moderate security environments, small to medium businesses, clients with pragmatic security posture
+
+#### Strategy 3: Firewall Management Interface Monitoring Only (Least Invasive)
+
+Monitor the **DMZ through the firewall's management interface** without direct DMZ access.
+
+```
+                        Internet
+                           │
+                           ▼
+                   ┌───────────────┐
+                   │   Firewall    │
+                   │               │
+                   │  Mgmt: 10.10.10.1 (Internal)
+                   │  DMZ:  172.16.1.1  (DMZ Interface)
+                   └───┬───────┬───┘
+                       │       │
+            ┌──────────┘       └──────────┐
+            │                             │
+      ┌─────▼──────┐              ┌───────▼─────┐
+      │    DMZ     │              │   Internal  │
+      │  VLAN 99   │              │  Management │
+      │            │              │             │
+      │ [Web Srv]  │              │ [Collector] │
+      │ [Mail Gw]  │              │ 10.10.10.50 │
+      │ (Not       │              │             │
+      │  directly  │              │ Monitors    │
+      │  monitored)│              │ firewall    │
+      └────────────┘              └─────────────┘
+```
+
+**Approach:**
+- Monitor the firewall via its internal management interface
+- Firewall reports on DMZ zone health, bandwidth, and security events
+- No direct monitoring of DMZ devices
+
+**Pros:**
+- ✅ Zero DMZ access required
+- ✅ No security zone compromise
+- ✅ Firewall provides aggregated DMZ metrics
+
+**Cons:**
+- ❌ No visibility into individual DMZ devices
+- ❌ Cannot discover device details, uptime, or configuration
+- ❌ Limited to what firewall exposes via SNMP
+
+**Best for:** Very restrictive environments, clients who only need firewall-level DMZ visibility
+
+### Security Considerations
+
+When implementing any DMZ monitoring strategy, follow these security best practices:
+
+#### Principle of Least Privilege
+
+**Allow only essential protocols:**
+
+| Protocol | Port | Direction | Justification |
+|----------|------|-----------|---------------|
+| UDP | 161 | Collector → DMZ | SNMP read-only polling |
+| ICMP | — | Collector → DMZ | Connectivity monitoring |
+| TCP | 443 | Collector → Internet | Auvik cloud sync |
+
+**Explicitly deny everything else:**
+- No SSH/RDP from collector to DMZ (use jump host if admin access needed)
+- No database access (MySQL, PostgreSQL, MSSQL)
+- No file sharing (SMB, NFS)
+
+#### Firewall Rule Hardening
+
+Create **specific, logged rules** for collector access:
+
+**Example: Palo Alto Firewall**
+
+```
+Rule Name: Auvik-Collector-to-DMZ-SNMP
+Source Zone: Internal
+Source Address: 10.10.10.50 (collector IP)
+Destination Zone: DMZ
+Destination Address: 172.16.1.0/24 (DMZ subnet)
+Application: snmp
+Service: application-default
+Action: allow
+Log at Session End: Yes
+Profile Type: Security Profiles → Apply strict profile
+```
+
+**Example: pfSense/OPNsense**
+
+Navigate to **Firewall → Rules → Internal**
+
+| Source | Destination | Port | Protocol | Action | Log |
+|--------|-------------|------|----------|--------|-----|
+| 10.10.10.50 (Collector) | DMZ_Net alias | 161 | UDP | Allow | ✅ Yes |
+| 10.10.10.50 (Collector) | DMZ_Net alias | * | ICMP | Allow | ✅ Yes |
+| 10.10.10.50 (Collector) | DMZ_Net alias | * | Any | Reject | ✅ Yes |
+
+**Example: Fortinet FortiGate**
+
+```
+config firewall policy
+    edit 100
+        set name "Auvik-Collector-DMZ-SNMP"
+        set srcintf "Internal"
+        set dstintf "DMZ"
+        set srcaddr "Collector-10.10.10.50"
+        set dstaddr "DMZ-Subnet"
+        set action accept
+        set schedule "always"
+        set service "SNMP" "PING"
+        set logtraffic all
+        set comments "Auvik monitoring - approved [Date]"
+    next
+end
+```
+
+#### Read-Only SNMP Credentials
+
+**Create DMZ-specific SNMP community or SNMPv3 user:**
+
+**SNMPv2c Example:**
+- Internal devices: `viyu-readonly-internal`
+- DMZ devices: `viyu-readonly-dmz`
+
+If DMZ credentials are compromised, internal network remains protected.
+
+**SNMPv3 Example (Preferred):**
+
+On DMZ devices, configure a separate SNMPv3 user:
+
+```
+snmp-server group DMZ-MONITOR v3 priv read READONLY-VIEW
+snmp-server user viyu-dmz DMZ-MONITOR v3 auth sha DmzAuth123! priv aes 128 DmzPriv456!
+snmp-server view READONLY-VIEW iso included
+```
+
+**Benefits:**
+- Separate credentials for DMZ vs. internal
+- Credential compromise contained to DMZ
+- Different password rotation schedules if needed
+
+#### Network Segmentation Verification
+
+After configuration, validate isolation:
+
+**From DMZ Collector (if using Strategy 1):**
+
+```bash
+# Should SUCCEED - DMZ device access
+ping 172.16.1.10
+snmpwalk -v2c -c viyu-readonly-dmz 172.16.1.10 sysDescr
+
+# Should FAIL - Internal network should be unreachable
+ping 10.10.10.1
+ping 10.10.20.5
+ssh 10.10.10.1
+
+# Should SUCCEED - Internet access for Auvik cloud
+curl -I https://auvik.com
+```
+
+**From Internal Collector (if using Strategy 2):**
+
+```bash
+# Should SUCCEED - Internal device access
+ping 10.10.10.1
+snmpwalk -v2c -c viyu-readonly-internal 10.10.10.1 sysDescr
+
+# Should SUCCEED (if firewall rule in place) - DMZ read-only access
+ping 172.16.1.10
+snmpwalk -v2c -c viyu-readonly-dmz 172.16.1.10 sysDescr
+
+# Should FAIL - No SSH/RDP to DMZ
+ssh 172.16.1.10
+nc -zv 172.16.1.10 3389
+```
+
+#### Logging and Alerting
+
+Enable comprehensive logging for security audits:
+
+1. **Firewall Logs** — Log all collector-to-DMZ traffic
+2. **SNMP Access Logs** — Enable SNMP logging on DMZ devices (if supported)
+3. **Auvik Activity Logs** — Review which devices are being polled
+4. **Anomaly Detection** — Alert on unusual patterns (e.g., collector accessing SSH/RDP ports)
+
+**Example: Firewall Log Review**
+
+Regularly audit logs for:
+- ✅ Expected: UDP 161 from collector to DMZ devices
+- ✅ Expected: ICMP echo from collector to DMZ devices
+- ⚠️ Unexpected: TCP 22, 3389, 445, 135 from collector to DMZ → Investigate
+- ⚠️ Unexpected: Traffic from DMZ to internal network → **Critical - Possible breach**
+
+### DMZ Collector Configuration (Strategy 1)
+
+**Physical Setup:**
+
+1. Deploy a separate Pi 5 in the DMZ network
+2. Connect to a switch port on DMZ VLAN (access port, not trunk)
+3. Assign static IP in DMZ subnet (e.g., 172.16.1.50)
+
+**Network Configuration on Pi:**
+
+```bash
+# Edit /etc/dhcpcd.conf
+sudo nano /etc/dhcpcd.conf
+
+# Add static IP configuration
+interface eth0
+static ip_address=172.16.1.50/24
+static routers=172.16.1.1
+static domain_name_servers=8.8.8.8 8.8.4.4
+```
+
+**Firewall Rules (DMZ Collector → Internet):**
 
 | Source | Destination | Protocol | Port | Purpose |
 |--------|-------------|----------|------|---------|
-| DMZ Collector | DMZ devices | UDP | 161 | SNMP |
-| DMZ Collector | DMZ devices | ICMP | — | Ping |
-| DMZ Collector | Auvik Cloud | TCP | 443 | Data upload |
-| DMZ Collector | Internal | ANY | ANY | **DENY** |
+| 172.16.1.50 | DMZ devices | UDP | 161 | SNMP polling |
+| 172.16.1.50 | DMZ devices | ICMP | — | Ping monitoring |
+| 172.16.1.50 | auvik.com, *.auvik.com | TCP | 443 | Auvik cloud sync |
+| 172.16.1.50 | tailscale.com | TCP | 443 | Remote access (if used) |
+| 172.16.1.50 | Internal network | ANY | ANY | **DENY** |
 
 **Auvik Multi-Site Setup:**
 
-1. In Auvik, create **two sites** for this client:
+1. In Auvik portal, create **two sites** for this client:
    - Site 1: `ClientName-Internal`
    - Site 2: `ClientName-DMZ`
-2. Add internal collector to Site 1
-3. Add DMZ collector to Site 2
-4. Configure separate credentials if needed
+2. During collector installation on DMZ Pi, assign to `ClientName-DMZ` site
+3. Add DMZ-specific SNMP credentials to `ClientName-DMZ` site
+4. Configure discovery to target DMZ subnet only (172.16.1.0/24)
 
-:::tip Alternative: Firewall Exception
-If dual collectors are not feasible, create a **limited exception** allowing the internal collector to reach the DMZ:
-- Allow only SNMP (UDP 161) and ICMP
-- Use a dedicated service account with read-only SNMP
-- Log all connections for audit purposes
-:::
+### Internal Collector with DMZ Access (Strategy 2)
+
+**Firewall Rules (Internal Collector → DMZ):**
+
+Create a **tightly scoped rule** allowing only monitoring protocols:
+
+| Source | Destination | Protocol | Port | Purpose | Log |
+|--------|-------------|----------|------|---------|-----|
+| 10.10.10.50 | 172.16.1.0/24 | UDP | 161 | SNMP | ✅ |
+| 10.10.10.50 | 172.16.1.0/24 | ICMP | — | Ping | ✅ |
+
+**Deny rule below the allow rule:**
+
+| Source | Destination | Protocol | Port | Action | Log |
+|--------|-------------|----------|------|--------|-----|
+| 10.10.10.50 | 172.16.1.0/24 | ANY | ANY | **DENY** | ✅ |
+
+This ensures the collector cannot access DMZ via SSH, RDP, HTTP, or any other management protocol.
+
+**Auvik Configuration:**
+
+1. Use **single site** for this client: `ClientName-Network`
+2. Add both internal and DMZ credentials to the same Auvik site
+3. Configure discovery to include both internal subnets and DMZ subnet
+4. Auvik will use appropriate credentials per device automatically
+
+### Testing and Verification
+
+After implementing DMZ monitoring, validate the configuration:
+
+#### Connectivity Testing
+
+**From the collector (regardless of strategy):**
+
+```bash
+# Test SNMP to DMZ device
+snmpwalk -v2c -c viyu-readonly-dmz 172.16.1.10 sysDescr
+
+# Expected output
+SNMPv2-MIB::sysDescr.0 = STRING: [Device description]
+
+# Test ICMP
+ping -c 4 172.16.1.10
+
+# Expected: 0% packet loss
+```
+
+#### Security Testing (Strategy 2 - Internal Collector with DMZ Access)
+
+Verify that **only** SNMP and ICMP are allowed:
+
+```bash
+# These should FAIL (timeout or connection refused)
+ssh 172.16.1.10
+telnet 172.16.1.10 22
+nc -zv 172.16.1.10 3389  # RDP
+nc -zv 172.16.1.10 80    # HTTP
+nc -zv 172.16.1.10 443   # HTTPS
+
+# These should SUCCEED
+snmpget -v2c -c viyu-readonly-dmz 172.16.1.10 sysUpTime.0
+ping 172.16.1.10
+```
+
+#### Firewall Log Verification
+
+After running tests, check firewall logs:
+
+**Expected Logs:**
+```
+ALLOW: 10.10.10.50:56789 → 172.16.1.10:161 (UDP) - SNMP
+ALLOW: 10.10.10.50 → 172.16.1.10 (ICMP) - Echo Request
+DENY:  10.10.10.50:54321 → 172.16.1.10:22 (TCP) - SSH
+```
+
+If you see unexpected ALLOW entries for SSH/RDP/other protocols, **review and tighten firewall rules immediately**.
+
+### Common Issues
+
+#### Issue: DMZ devices not discovered in Auvik
+
+**Cause 1:** Firewall blocking SNMP from collector to DMZ
+
+**Resolution:**
+1. Verify firewall rule is in place and active
+2. Check rule order (deny rules may precede allow rule)
+3. Test SNMP manually from collector:
+   ```bash
+   snmpwalk -v2c -c viyu-readonly-dmz 172.16.1.10 sysDescr
+   ```
+4. Check firewall logs for blocked traffic
+
+**Cause 2:** Wrong SNMP credentials for DMZ devices
+
+**Resolution:**
+1. Verify SNMP community/SNMPv3 credentials on DMZ devices
+2. Test with snmpwalk using exact credentials configured in Auvik
+3. Ensure DMZ devices are configured to accept SNMP from collector IP
+
+**Cause 3:** DMZ devices not configured with SNMP
+
+**Resolution:**
+1. Enable SNMP on each DMZ device
+2. Configure read-only community or SNMPv3 user
+3. Add collector IP to SNMP allowed hosts (if device requires it)
+
+#### Issue: DMZ collector cannot reach Auvik cloud
+
+**Cause:** Outbound HTTPS blocked from DMZ
+
+**Resolution:**
+1. Add firewall rule allowing DMZ collector to reach *.auvik.com:443
+2. Verify DNS resolution works from DMZ:
+   ```bash
+   nslookup auvik.com
+   ```
+3. Test HTTPS connectivity:
+   ```bash
+   curl -I https://auvik.com
+   ```
+
+#### Issue: Security team flags collector-to-DMZ access as violation
+
+**Cause:** Strategy 2 (internal-to-DMZ exception) conflicts with security policy
+
+**Resolution:**
+1. Discuss with security team:
+   - Show read-only nature of SNMP
+   - Demonstrate logging of all access
+   - Explain monitoring requirement
+2. If rejected, switch to **Strategy 1 (Dual Collector Setup)**
+3. Document security approval for audit purposes
+
+### Compliance Considerations
+
+Different compliance frameworks have specific requirements for DMZ monitoring:
+
+#### PCI-DSS (Payment Card Industry)
+
+If DMZ hosts payment processing infrastructure:
+- ✅ **Requirement 1.3.6** — Monitoring systems must not compromise DMZ isolation
+- ✅ **Recommendation:** Use Strategy 1 (Dual Collector) to maintain segmentation
+- ✅ Ensure all collector-to-DMZ traffic is logged
+- ✅ Quarterly review of firewall rules and access logs
+
+#### HIPAA (Healthcare)
+
+If DMZ hosts patient data systems:
+- ✅ **§164.312(a)(1)** — Monitoring access must be logged and auditable
+- ✅ Use SNMPv3 with authPriv for encrypted polling
+- ✅ Document monitoring access in security risk assessment
+- ✅ Limit collector access to minimum necessary (SNMP + ICMP only)
+
+#### SOC 2 Type II
+
+Service providers with DMZ infrastructure:
+- ✅ Document DMZ monitoring architecture in system description
+- ✅ Include firewall rules and access controls in audit evidence
+- ✅ Demonstrate least-privilege access (read-only SNMP)
+- ✅ Provide logs showing no unauthorized DMZ access attempts
+
+### Documentation Template
+
+Create a document for the client (and for auditors) detailing the DMZ monitoring setup:
+
+```
+DMZ Monitoring Architecture - [Client Name]
+
+Deployment Strategy: [Dual Collector / Internal with Exception / Firewall-only]
+
+Network Details:
+- DMZ Subnet: 172.16.1.0/24
+- DMZ Collector IP: 172.16.1.50 (if applicable)
+- Internal Collector IP: 10.10.10.50
+- Firewall: [Vendor/Model]
+
+Firewall Rules:
+- Rule ID: [ID]
+- Source: [Collector IP]
+- Destination: [DMZ Subnet]
+- Allowed Protocols: UDP 161 (SNMP), ICMP
+- Denied Protocols: All others
+- Logging: Enabled
+
+Credentials:
+- SNMP Version: [v2c / v3]
+- Community/Username: viyu-readonly-dmz
+- Access Level: Read-only
+- Allowed Source: [Collector IP only]
+
+Security Controls:
+- DMZ-to-Internal traffic: Blocked
+- Collector-to-DMZ management protocols: Blocked
+- All access logged: Yes
+- Log retention: [Period]
+
+Last Reviewed: [Date]
+Next Review: [Date]
+
+Approved By:
+- IT Manager: [Name, Date]
+- Security Team: [Name, Date]
+```
+
+---
 
 ---
 
