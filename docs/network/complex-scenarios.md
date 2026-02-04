@@ -105,7 +105,7 @@ nc -zv 10.10.20.5 445
 
 ### Challenge
 
-Small sites use a single router/firewall with one physical interface handling multiple VLANs via subinterfaces (802.1Q trunking).
+Small sites use a single router/firewall with one physical interface handling multiple VLANs via subinterfaces (802.1Q trunking). This router-on-a-stick configuration is common in small to medium deployments where cost and simplicity are priorities.
 
 ### Architecture Example
 
