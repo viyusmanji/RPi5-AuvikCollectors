@@ -95,6 +95,127 @@
   transform: translateY(1px);
 }
 
+.toggleSuggestionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: var(--ifm-button-border-radius);
+  background-color: var(--ifm-button-background-color);
+  color: var(--ifm-button-color);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.toggleSuggestionButton:hover {
+  background-color: var(--ifm-color-emphasis-100);
+  border-color: var(--ifm-color-primary);
+}
+
+.toggleSuggestionButton:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.toggleSuggestionButton:active {
+  transform: translateY(1px);
+}
+
+.chevronIcon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  transition: transform 0.2s ease-in-out;
+  margin-left: auto;
+}
+
+.chevronIconExpanded {
+  transform: rotate(180deg);
+}
+
+.suggestionForm {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  background-color: var(--ifm-background-surface-color);
+}
+
+.suggestionLabel {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ifm-color-content);
+}
+
+.suggestionTextarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  border-radius: var(--ifm-button-border-radius);
+  background-color: var(--ifm-background-color);
+  color: var(--ifm-color-content);
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.suggestionTextarea:focus {
+  outline: none;
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 0 0 2px var(--ifm-color-primary-lighter);
+}
+
+.suggestionTextarea::placeholder {
+  color: var(--ifm-color-emphasis-600);
+}
+
+.suggestionHelp {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.8rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.submitSuggestionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--ifm-color-primary);
+  border-radius: var(--ifm-button-border-radius);
+  background-color: var(--ifm-color-primary);
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.submitSuggestionButton:hover {
+  background-color: var(--ifm-color-primary-dark);
+  border-color: var(--ifm-color-primary-dark);
+}
+
+.submitSuggestionButton:focus {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+}
+
+.submitSuggestionButton:active {
+  transform: translateY(1px);
+}
+
 /* Dark mode adjustments */
 html[data-theme='dark'] .feedbackContainer {
   border-color: var(--ifm-color-emphasis-200);
@@ -114,4 +235,25 @@ html[data-theme='dark'] .reportIssueButton {
 
 html[data-theme='dark'] .reportIssueButton:hover {
   background-color: var(--ifm-color-emphasis-200);
+}
+
+html[data-theme='dark'] .toggleSuggestionButton {
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+html[data-theme='dark'] .toggleSuggestionButton:hover {
+  background-color: var(--ifm-color-emphasis-200);
+}
+
+html[data-theme='dark'] .suggestionForm {
+  border-color: var(--ifm-color-emphasis-200);
+}
+
+html[data-theme='dark'] .suggestionTextarea {
+  border-color: var(--ifm-color-emphasis-300);
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+html[data-theme='dark'] .suggestionTextarea:focus {
+  border-color: var(--ifm-color-primary);
 }
