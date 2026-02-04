@@ -123,12 +123,12 @@ The process of duplicating the golden image to multiple SD cards simultaneously.
 
 | Task | Documentation |
 |------|---------------|
-| Create golden image | [Golden Image Creation](/docs/golden-image/creating-the-image) |
-| Clone to multiple cards | [Mass Cloning Procedures](/docs/multi-site/mass-cloning) |
+| Create golden image | [Golden Image Contents](/docs/golden-image/image-contents) |
+| Clone to multiple cards | [Bulk Preparation](/docs/multi-site/bulk-preparation) |
 | Customize per site | [Batch Customization](/docs/multi-site/batch-customization) |
-| Bench test collectors | [Pre-Deployment Testing](/docs/multi-site/bench-testing) |
-| Ship to sites | [Packaging and Shipping](/docs/multi-site/packaging-shipping) |
-| Track deployments | [Deployment Tracking](/docs/multi-site/deployment-tracking) |
+| Test and verify | [Pre-Deployment Checklist](/docs/deployment/pre-deployment) |
+| Deploy on-site | [On-Site Deployment](/docs/deployment/on-site) |
+| Monitor fleet | [Fleet Management](/docs/multi-site/fleet-management) |
 
 ## Prerequisites
 
@@ -201,10 +201,10 @@ Avoid these common mistakes in multi-site deployments:
 
 ## Next Steps
 
-1. **New to multi-site?** → Start with [Golden Image Creation](/docs/golden-image/creating-the-image)
-2. **Ready to clone?** → Follow [Mass Cloning Procedures](/docs/multi-site/mass-cloning)
+1. **New to multi-site?** → Start with [Golden Image Contents](/docs/golden-image/image-contents)
+2. **Ready to clone?** → Follow [Bulk Preparation](/docs/multi-site/bulk-preparation)
 3. **Need to customize?** → Use [Batch Customization](/docs/multi-site/batch-customization)
-4. **Preparing to ship?** → Check [Packaging and Shipping](/docs/multi-site/packaging-shipping)
+4. **Setting up naming?** → Review [Naming Conventions](/docs/multi-site/naming-conventions)
 
 ## Support and Questions
 
@@ -212,4 +212,4 @@ For multi-site deployment assistance:
 
 - Review the [Complete Deployment Checklist](/docs/checklists/complete-deployment)
 - Consult [Troubleshooting](/docs/troubleshooting/common-issues) for common problems
-- Reference [Golden Image Documentation](/docs/golden-image/overview) for image creation issues
+- Reference [Golden Image Cloning](/docs/golden-image/cloning-process) for image creation issues

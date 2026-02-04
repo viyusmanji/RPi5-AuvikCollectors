@@ -554,5 +554,5 @@ column -t -s ',' qa-results.csv
 
 After bulk preparation:
 - [Pre-Deployment Checklist](../deployment/pre-deployment.md) — Final verification before shipping
-- [On-Site Installation](../deployment/on-site-installation.md) — Field deployment procedures
+- [On-Site Installation](../deployment/on-site.md) — Field deployment procedures
 - [Multi-Site Coordination](./overview.md) — Project management for large deployments

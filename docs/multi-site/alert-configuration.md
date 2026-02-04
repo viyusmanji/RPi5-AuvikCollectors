@@ -263,7 +263,7 @@ Structure escalation to scale with team size:
 |-----------|------------------|
 | Collector offline | Auto-create ticket, check Tailscale |
 | Device reboot | Log event, monitor for pattern |
-| Brief outage (<5 min) | Log only, no ticket |
+| Brief outage (&lt;5 min) | Log only, no ticket |
 
 Automation handles routine events.
 
@@ -621,11 +621,11 @@ Track alert effectiveness across multi-site deployment:
 
 | Metric | Target | Purpose |
 |--------|--------|---------|
-| Mean Time to Detect (MTTD) | <5 minutes | Alert triggers promptly |
-| Mean Time to Acknowledge (MTTA) | <15 minutes | Team responsive |
-| Mean Time to Resolve (MTTR) | <4 hours (critical) | Efficient resolution |
-| False Positive Rate | <10% | Alert quality |
-| Alert Volume | <5 per site per day | Avoid fatigue |
+| Mean Time to Detect (MTTD) | &lt;5 minutes | Alert triggers promptly |
+| Mean Time to Acknowledge (MTTA) | &lt;15 minutes | Team responsive |
+| Mean Time to Resolve (MTTR) | &lt;4 hours (critical) | Efficient resolution |
+| False Positive Rate | &lt;10% | Alert quality |
+| Alert Volume | &lt;5 per site per day | Avoid fatigue |
 
 ### Monthly Alert Review
 

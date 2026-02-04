@@ -600,4 +600,3 @@ auvik-{clientcode}-{sitecode}
 After establishing naming conventions:
 - [Batch Customization](./batch-customization.md) — Apply conventions at scale
 - [Fleet Management](./fleet-management.md) — Manage devices with consistent naming
-- [Documentation Templates](../reference/templates.md) — Standardized tracking
