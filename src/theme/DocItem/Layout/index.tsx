@@ -18,6 +18,7 @@ import DocItemContent from '@theme/DocItem/Content';
 import DocBreadcrumbs from '@theme/DocBreadcrumbs';
 import ContentVisibility from '@theme/ContentVisibility';
 import RelatedPages from '@site/src/components/RelatedPages';
+import PageSuggestions from '@site/src/components/PageSuggestions';
 import type {Props} from '@theme/DocItem/Layout';
 import styles from './styles.module.css';
 
@@ -59,6 +60,7 @@ export default function DocItemLayout({children}: Props): React.ReactElement {
             <DocItemFooter />
           </article>
           <RelatedPages />
+          <PageSuggestions />
           <DocItemPaginator />
         </div>
       </div>
