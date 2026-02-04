@@ -858,7 +858,7 @@ Deploying SNMPv3 across hundreds of devices requires a systematic approach:
 Use one SNMPv3 credential across all devices:
 - **Pros:** Easy to deploy, single credential in Auvik
 - **Cons:** Password rotation requires updating all devices
-- **Best for:** Small to medium enterprises (<200 devices)
+- **Best for:** Small to medium enterprises (&lt;200 devices)
 
 **Option 2: Role-Based Accounts (More Secure)**
 
@@ -1090,14 +1090,14 @@ Client has multiple locations connected via MPLS or site-to-site VPN. Decide whe
 | Factor | Centralized (Single Collector) | Distributed (Per-Site Collectors) |
 |--------|-------------------------------|----------------------------------|
 | **WAN Bandwidth** | Requires stable, low-latency WAN | Minimal WAN usage (only Auvik cloud sync) |
-| **Device Count** | Works if total devices <500 | Scales better for large multi-site |
+| **Device Count** | Works if total devices &lt;500 | Scales better for large multi-site |
 | **WAN Reliability** | If WAN fails, remote sites lose monitoring | Each site independent |
 | **Management** | Simpler (one collector) | More complex (multiple collectors) |
 | **Cost** | Lower (one Pi) | Higher (Pi per site) |
 
 ### Recommended Approach
 
-**Small sites (<50 devices/site), reliable WAN:**
+**Small sites (&lt;50 devices/site), reliable WAN:**
 - Deploy **one collector at headquarters**
 - Configure routing to allow collector access to all sites
 
