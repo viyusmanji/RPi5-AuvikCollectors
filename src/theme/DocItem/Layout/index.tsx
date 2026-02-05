@@ -68,7 +68,7 @@ export default function DocItemLayout({children}: Props): React.ReactElement {
             <DocItemContent>{children}</DocItemContent>
             <DocItemFooter />
           </article>
-          <DocFeedback githubRepo="viyu-net/viyu_AuvikCollectors" />
+          <DocFeedback githubRepo="viyusmanji/viyu_AuvikCollectors" />
           <RelatedPages />
           <PageSuggestions />
           <DocItemPaginator />
