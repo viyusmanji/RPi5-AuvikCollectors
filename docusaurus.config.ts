@@ -12,10 +12,10 @@ const config: Config = {
   },
 
   // GitHub Pages deployment
-  url: 'https://viyu-net.github.io',
-  baseUrl: '/viyu_AuvikCollectors/',
-  organizationName: 'viyu-net',
-  projectName: 'viyu_AuvikCollectors',
+  url: 'https://viyusmanji.github.io',
+  baseUrl: '/RPi5-AuvikCollectors/',
+  organizationName: 'viyusmanji',
+  projectName: 'RPi5-AuvikCollectors',
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
 
@@ -33,7 +33,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/viyu-net/viyu_AuvikCollectors/edit/main/',
+          editUrl: 'https://github.com/viyusmanji/RPi5-AuvikCollectors/edit/main/',
           routeBasePath: 'docs',
         },
         blog: false, // Disable blog
